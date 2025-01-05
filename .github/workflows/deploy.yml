@@ -28,3 +28,11 @@ jobs:
           curl https://cli-assets.heroku.com/install.sh | sh
       - name: Release the app
         run: heroku container:release web --app wine-crud-app
+
+      - name: Run database migrations
+        run: |
+          heroku run alembic upgrade head --app wine-crud-app
+
+      - name: Run data seeding
+        run: |
+          heroku run python -c "from app.seed import seed_data; seed_data('app/docs/winequality-red.csv')" --app wine-crud-app

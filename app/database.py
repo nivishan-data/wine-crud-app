@@ -1,13 +1,11 @@
-# app/database.py
-
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-import os
+# Handle Heroku database URL
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(DATABASE_URL or "sqlite:///./wine.db")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
