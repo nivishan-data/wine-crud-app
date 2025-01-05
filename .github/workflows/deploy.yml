@@ -20,8 +20,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t registry.heroku.com/your-app-name/web .
-          docker push registry.heroku.com/your-app-name/web
+          docker build -t registry.heroku.com/wine-crud-app/web .
+          docker push registry.heroku.com/wine-crud-app/web
 
       - name: Release the app
-        run: heroku container:release web --app your-app-name
+        run: heroku container:release web --app wine-crud-app
