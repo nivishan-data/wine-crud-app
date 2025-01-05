@@ -9,8 +9,6 @@ from . import crud, models, schemas
 from .database import SessionLocal, engine
 from .seed import seed_data  # Import the seed_data function
 
-models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI(
     title="Wine Quality API",
     description="An API for managing the Wine Quality dataset, with a simple UI.",
@@ -40,17 +38,25 @@ def home(request: Request):
     """
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Try different possible locations for the CSV file
-csv_locations = [
-    os.path.join(os.path.dirname(__file__), "docs", "winequality-red.csv"),
-    "/app/winequality-red.csv",
-    "winequality-red.csv"
-]
+@app.on_event("startup")
+async def startup_event():
+    # Create tables
+    models.Base.metadata.create_all(bind=engine)
+    
+    # Try different possible locations for the CSV file
+    csv_locations = [
+        os.path.join(os.path.dirname(__file__), "docs", "winequality-red.csv"),
+        "/app/winequality-red.csv",
+        "winequality-red.csv"
+    ]
 
-for csv_path in csv_locations:
-    if os.path.exists(csv_path):
-        seed_data(csv_path)
-        break
+    for csv_path in csv_locations:
+        if os.path.exists(csv_path):
+            try:
+                seed_data(csv_path)
+            except Exception as e:
+                print(f"Error seeding data: {str(e)}")
+            break
 
 @app.get("/wines", response_model=list[schemas.Wine])
 def read_wines(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
