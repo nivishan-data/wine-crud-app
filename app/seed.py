@@ -68,4 +68,23 @@ def seed_data(csv_path: str):
         raise
 
 if __name__ == "__main__":
-    seed_data("app/docs/winequality-red.csv")
+    # Try different possible locations of the CSV file
+    possible_paths = [
+        "app/docs/winequality-red.csv",
+        "docs/winequality-red.csv",
+        "winequality-red.csv",
+        "../winequality-red.csv"
+    ]
+    
+    csv_found = False
+    for path in possible_paths:
+        if os.path.exists(path):
+            print(f"Found CSV file at: {path}")
+            seed_data(path)
+            csv_found = True
+            break
+    
+    if not csv_found:
+        print("Error: Could not find winequality-red.csv in any of the expected locations:")
+        for path in possible_paths:
+            print(f"- {os.path.abspath(path)}")

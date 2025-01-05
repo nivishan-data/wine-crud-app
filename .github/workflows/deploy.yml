@@ -35,4 +35,4 @@ jobs:
 
       - name: Run data seeding
         run: |
-          heroku run python -c "from app.seed import seed_data; seed_data('app/docs/winequality-red.csv')" --app wine-crud-app
+          heroku run "cd /app && python -m app.seed" --app wine-crud-app
