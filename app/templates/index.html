@@ -1,0 +1,110 @@
+<!-- app/templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wine Quality UI</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <h1>Wine Quality UI</h1>
+    <div>
+        <button onclick="loadWines()">Load All Wines</button>
+        <div class="table-container">
+            <table id="wineTable" border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Fixed Acidity</th>
+                    <th>Alcohol</th>
+                    <th>Quality</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+            </table>
+        </div>
+
+    <hr/>
+
+    <div>
+        <h2>Create a Wine</h2>
+        <form onsubmit="createWine(event)">
+            <label>Fixed Acidity: <input type="number" step="any" id="fixedAcidity"/></label><br/>
+            <label>Volatile Acidity: <input type="number" step="any" id="volatileAcidity"/></label><br/>
+            <label>Citric Acid: <input type="number" step="any" id="citricAcid"/></label><br/>
+            <label>Residual Sugar: <input type="number" step="any" id="residualSugar"/></label><br/>
+            <label>Chlorides: <input type="number" step="any" id="chlorides"/></label><br/>
+            <label>Free Sulfur Dioxide: <input type="number" step="any" id="freeSO2"/></label><br/>
+            <label>Total Sulfur Dioxide: <input type="number" step="any" id="totalSO2"/></label><br/>
+            <label>Density: <input type="number" step="any" id="density"/></label><br/>
+            <label>pH: <input type="number" step="any" id="pH"/></label><br/>
+            <label>Sulphates: <input type="number" step="any" id="sulphates"/></label><br/>
+            <label>Alcohol: <input type="number" step="any" id="alcohol"/></label><br/>
+            <label>Quality: <input type="number" id="quality"/></label><br/>
+            <button type="submit">Create Wine</button>
+        </form>
+    </div>
+
+    <script>
+        async function loadWines() {
+            const response = await fetch('/wines');
+            const data = await response.json();
+            const tbody = document.querySelector('#wineTable tbody');
+            tbody.innerHTML = "";
+            data.forEach(w => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${w.id}</td>
+                    <td>${w.fixed_acidity}</td>
+                    <td>${w.alcohol}</td>
+                    <td>${w.quality}</td>
+                    <td><button onclick="deleteWine(${w.id})">Delete</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function createWine(event) {
+            event.preventDefault();
+            const wineData = {
+                fixed_acidity: parseFloat(document.getElementById('fixedAcidity').value),
+                volatile_acidity: parseFloat(document.getElementById('volatileAcidity').value),
+                citric_acid: parseFloat(document.getElementById('citricAcid').value),
+                residual_sugar: parseFloat(document.getElementById('residualSugar').value),
+                chlorides: parseFloat(document.getElementById('chlorides').value),
+                free_sulfur_dioxide: parseFloat(document.getElementById('freeSO2').value),
+                total_sulfur_dioxide: parseFloat(document.getElementById('totalSO2').value),
+                density: parseFloat(document.getElementById('density').value),
+                pH: parseFloat(document.getElementById('pH').value),
+                sulphates: parseFloat(document.getElementById('sulphates').value),
+                alcohol: parseFloat(document.getElementById('alcohol').value),
+                quality: parseInt(document.getElementById('quality').value),
+            };
+            const response = await fetch('/wines', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(wineData)
+            });
+            if (response.ok) {
+                alert('Wine created successfully!');
+                loadWines();
+            } else {
+                alert('Error creating wine.');
+            }
+        }
+
+        async function deleteWine(id) {
+            const response = await fetch(`/wines/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                alert('Wine deleted.');
+                loadWines();
+            } else {
+                alert('Error deleting wine.');
+            }
+        }
+    </script>
+</body>
+</html>
