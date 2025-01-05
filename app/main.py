@@ -17,11 +17,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
+import os
+
 # Mount static files (CSS, JS, images, etc.)
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 # Configure Jinja2 templates
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
 # Dependency to get DB session
 def get_db():
@@ -38,7 +40,17 @@ def home(request: Request):
     """
     return templates.TemplateResponse("index.html", {"request": request})
 
-seed_data("app/docs/winequality-red.csv")  # Seed the data from the CSV file
+# Try different possible locations for the CSV file
+csv_locations = [
+    os.path.join(os.path.dirname(__file__), "docs", "winequality-red.csv"),
+    "/app/winequality-red.csv",
+    "winequality-red.csv"
+]
+
+for csv_path in csv_locations:
+    if os.path.exists(csv_path):
+        seed_data(csv_path)
+        break
 
 @app.get("/wines", response_model=list[schemas.Wine])
 def read_wines(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
