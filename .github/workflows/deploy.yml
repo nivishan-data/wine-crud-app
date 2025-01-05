@@ -23,5 +23,8 @@ jobs:
           docker build -t registry.heroku.com/wine-crud-app/web .
           docker push registry.heroku.com/wine-crud-app/web
 
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
       - name: Release the app
         run: heroku container:release web --app wine-crud-app
