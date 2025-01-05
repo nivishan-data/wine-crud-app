@@ -1,21 +1,22 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM heroku/heroku:20
 
-# Create a working directory
+# Install Python
+RUN apt-get update && \
+    apt-get install -y python3-pip python3-dev && \
+    cd /usr/local/bin && \
+    ln -s /usr/bin/python3 python && \
+    pip3 install --upgrade pip
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=8000 \
+    PYTHONPATH=/app
+
 WORKDIR /app
 
-# Copy requirements and install
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Copy the CSV file to a known location
-COPY winequality-red.csv /app/winequality-red.csv
-
-# Copy the rest of the code
 COPY . .
 
-# Expose port 8000 for FastAPI
-EXPOSE 8000
-
-# Command to run the app with uvicorn
-CMD uvicorn app.main:app --host=0.0.0.0 --port=${PORT:-8000}
+CMD uvicorn app.main:app --host=0.0.0.0 --port=$PORT
